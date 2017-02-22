@@ -1,5 +1,0 @@
-/* sssyyy */
-
-module.exports = () => {
-
-}
