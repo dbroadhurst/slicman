@@ -1,0 +1,5 @@
+/* sssyyy */
+
+module.exports = () => {
+
+}
