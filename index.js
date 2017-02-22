@@ -6,6 +6,7 @@ const fs = require('fs-extra')
 const glob = require('glob')
 const debug = require('debug')
 const program = require('commander')
+const chalk = require('chalk')
 
 program
   .version('0.0.1')
@@ -29,11 +30,9 @@ try {
   template = fs.readFileSync(templateFile, 'utf8')
 }
 catch (err) {
-  debug.log('could not find ', templateFile)
+  debug.log(chalk.red('could not find ', templateFile))
   return 1
 }
-
-console.log(template)
 
 glob(srcPath + '**/*.js', { ignore: ignoreList }, (err, files) => {
   files.forEach(filename => {
@@ -49,10 +48,10 @@ glob(srcPath + '**/*.js', { ignore: ignoreList }, (err, files) => {
         return updateLicense(outFilename, template, data)
       })
       .then((filename) => {
-        debug.log('src: ' + inFilename + ' out:' + outFilename)
+        debug.log(chalk.green('src: ' + inFilename + ' out:' + outFilename))
       })
       .catch(err => {
-        debug.log('error: ', err)
+        debug.log(chalk.red('error: ', err))
       })
   })
 
