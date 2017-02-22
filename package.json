@@ -9,6 +9,9 @@
   "keywords": [],
   "author": "David Broadhurst",
   "license": "MIT",
+  "bin": {
+    "slicman": "./index.js"
+  },
   "dependencies": {
     "commander": "^2.9.0",
     "debug": "^2.6.1",
