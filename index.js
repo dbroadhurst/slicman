@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+'use strict'
+
 const fs = require('fs-extra')
 const glob = require('glob')
 const debug = require('debug')
@@ -10,15 +12,30 @@ program
   .usage('[options]')
   .option('-p, --path <p>', 'path')
   .option('-o, --output <p>', 'output')
-  .option('-e, --exclude <p>', 'exclude')
+  .option('-t, --template <p>', 'template')
+  .option('-i, --ignore <p>', 'ingnore')
   .parse(process.argv);
 
-var exclude = program.exclude &&
-  program.exclude.split(',').map(folder => { return folder + '/**' })
+const ignoreList = program.ignore &&
+  program.ignore.split(',').map(folder => { return folder + '/**' })
 
-var srcPath = program.path ? program.path + '/' : ''
+let srcPath = program.path ? program.path + '/' : ''
 
-glob(srcPath + '**/*.js', { ignore: exclude }, (err, files) => {
+let templateFile = program.template
+
+let template
+
+try {
+  template = fs.readFileSync(templateFile, 'utf8')
+}
+catch (err) {
+  debug.log('could not find ', templateFile)
+  return 1
+}
+
+console.log(template)
+
+glob(srcPath + '**/*.js', { ignore: ignoreList }, (err, files) => {
   files.forEach(filename => {
     var inFilename = filename
     var outFilename = ''
@@ -29,7 +46,7 @@ glob(srcPath + '**/*.js', { ignore: exclude }, (err, files) => {
         return checkLicense(inFilename)
       })
       .then(data => {
-        return updateLicense(outFilename, data)
+        return updateLicense(outFilename, template, data)
       })
       .then((filename) => {
         debug.log('src: ' + inFilename + ' out:' + outFilename)
@@ -38,10 +55,11 @@ glob(srcPath + '**/*.js', { ignore: exclude }, (err, files) => {
         debug.log('error: ', err)
       })
   })
+
 })
 
 const checkPath = (filename) => {
-  var output = program.output || ''
+  let output = program.output || ''
   if (output) {
     output = output + '/'
   }
@@ -70,9 +88,9 @@ const checkLicense = (filename) => {
   })
 }
 
-const updateLicense = (filename, data) => {
+const updateLicense = (filename, template, data) => {
   return new Promise((resolve, reject) => {
-    fs.writeFile(filename, ('/* sssyyy */' + data).toString(), 'utf8', err => {
+    fs.writeFile(filename, (template + data).toString(), 'utf8', err => {
       if (err) {
         reject(err)
       } else {
